@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X4G Panel</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Tahoma, "Vazirmatn", sans-serif;
+    background: #0f1115;
+    color: #e6e6e6;
+    margin: 0;
+    padding: 24px;
+  }
+  h1 { color: #4f8cff; margin-bottom: 4px; }
+  .subtitle { color: #888; margin-bottom: 20px; font-size: 14px; }
+  .status {
+    padding: 6px 14px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  .status.ok  { background: #1e4620; color: #7CFC7C; }
+  .status.bad { background: #4a1f1f; color: #ff8080; }
+
+  form.add {
+    margin-bottom: 24px;
+    display: flex;
+    gap: 8px;
+    max-width: 520px;
+  }
+  input[type=text] {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #2a2d34;
+    background: #1b1e24;
+    color: #eee;
+    font-size: 14px;
+  }
+  button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #4f8cff;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  button:hover { opacity: 0.9; }
+  button.danger { background: #c0392b; }
+  button.secondary { background: #2a2d34; }
+
+  table { width: 100%; border-collapse: collapse; background: #15171c; border-radius: 10px; overflow: hidden; }
+  th, td { padding: 12px; border-bottom: 1px solid #2a2d34; text-align: right; font-size: 14px; }
+  th { color: #888; font-weight: normal; }
+
+  .link-box {
+    max-width: 380px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: monospace;
+    font-size: 12px;
+    color: #9ee6ff;
+    background: #0f1115;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; }
+  .badge.on  { background: #1e4620; color: #7CFC7C; }
+  .badge.off { background: #3a2f1f; color: #ffb27a; }
+  .actions form { display: inline; }
+</style>
+</head>
+<body>
+  <h1>🚀 X4G Panel</h1>
+  <div class="subtitle">دامنه‌ی فعلی: {{ public_host }}</div>
+
+  <span class="status {{ 'ok' if xray_running else 'bad' }}">
+    Xray-core: {{ 'در حال اجرا ✅' if xray_running else 'متوقف ⚠️' }}
+  </span>
+
+  <form class="add" method="post" action="/dashboard/users">
+    <input type="text" name="label" placeholder="نام/برچسب کاربر جدید" required>
+    <button type="submit">➕ ساخت کاربر</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>برچسب</th>
+        <th>وضعیت</th>
+        <th>لینک VLESS</th>
+        <th>عملیات</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.label }}</td>
+        <td>
+          <span class="badge {{ 'on' if u.enabled else 'off' }}">
+            {{ 'فعال' if u.enabled else 'غیرفعال' }}
+          </span>
+        </td>
+        <td>
+          <div class="link-box" id="link-{{ u.id }}">{{ u.link }}</div><br>
+          <button type="button" class="secondary" onclick="copyLink({{ u.id }})">📋 کپی لینک</button>
+        </td>
+        <td class="actions">
+          <form method="post" action="/dashboard/users/{{ u.id }}/toggle">
+            <button type="submit" class="secondary">
+              {{ '⏸ غیرفعال' if u.enabled else '▶ فعال' }}
+            </button>
+          </form>
+          <form method="post" action="/dashboard/users/{{ u.id }}/delete"
+                onsubmit="return confirm('مطمئنی این کاربر حذف بشه؟');">
+            <button type="submit" class="danger">🗑 حذف</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5">هنوز هیچ کاربری ساخته نشده. از فرم بالا شروع کن.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+<script>
+function copyLink(id) {
+  const text = document.getElementById('link-' + id).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('لینک کپی شد!');
+  }).catch(() => {
+    alert('کپی خودکار کار نکرد؛ لینک رو دستی سلکت و کپی کن.');
+  });
+}
+</script>
+</body>
+</html>
