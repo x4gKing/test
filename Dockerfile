@@ -22,6 +22,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# کپی یکجای کل پروژه (به‌جای کپی‌های جدا جدا برای هر فایل/پوشه)
 COPY . .
 RUN chmod +x start.sh
 
