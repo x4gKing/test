@@ -22,9 +22,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py database.py xray_manager.py ./
-COPY templates ./templates
-COPY nginx.conf.template start.sh ./
+COPY . .
 RUN chmod +x start.sh
 
 ENV DATA_DIR=/data
